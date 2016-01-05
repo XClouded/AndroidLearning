@@ -1,13 +1,12 @@
 #读读Android源代码 android.os.Looper
-
-##Looper不会停止的消息处理机
+#Looper不会停止的消息处理机
 [Reference 4 Looper](https://developer.android.com/reference/android/os/Looper.html)
 [Source 4 Looper](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.2.2_r1/android/os/Looper.java)
 
 从字面上了解是“循环者”，也就是在不停的循环状态。所谓Looper线程就是循环工作的线程。在程序开发中我们经常会需要一个线程不断循环，一旦有新任务则执行，执行完继续等待下一个任务，这就是Looper。
 这里请不要把Looper与线程之间的概念相混淆，Looper其实可以看作线程的一个功能。一个普通的线程是没有Looper的功能的。通过在当前线程执行Looper.prepare()之后，当前线程就有了Looper的功能。使当前线程成为一个Looper线程。
 
-###prepare()
+#prepare()
 在一个普通线程会调用prepare()方法
 ``` java
 public class Looper {
@@ -104,7 +103,7 @@ public class ThreadLocal<T> {
 
 从它的get、set方法的实现不难看出ThreadLocal中存储的T（泛型）是与所在线程有关系的。再回到Looper看不同的线程通过sThreadLocal.get()方法得到的Looper对象都是不一样的。ThreadLocal<Looper> sThreadLocal之所以定义为static的类型是为了让所有线程的Looper集中统一管理。Looper.prepare()方法就保证了Looper在这个线程存在的唯一性。
 
-###loop()
+#loop()
 这个方法就是Looper的主要功能了。
 ``` java
 public class Looper {
@@ -165,8 +164,60 @@ public class Looper {
 注意看一下上面的代码19行，消息循环的逻辑开始。
 第33行通过Message的成员变量target分发Message，也需有些读者已经猜到了，这个target就是一个Handler对象。
 [See Message Source](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.2.2_r1/android/os/Message.java/#89)
+进入这个loop方法就无限的循环起来了，直到MessageQueue.next()返回的Message为null以后这个循环就结束了。跟踪一下这个方法能让它返回为空就是在以下的代码块。mQuiting的控制请参考下面quit()方法。
+``` java
+public class MessageQueue {
+    final Message next() {
+    ...
+            synchronized (this) {
+                if (mQuiting) {
+                    return null;
+                }
+    ...
+    }
+}
+```
+[See MessageQueue Source](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.2.2_r1/android/os/MessageQueue.java?av=f#127)
 
-###prepareMainLooper()
+#quit()
+``` java
+public class Looper {
+    ...    
+    /**
+     * Quits the looper.
+     *
+     * Causes the {@link #loop} method to terminate as soon as possible.
+     */
+    public void quit() {
+        mQueue.quit();
+    }
+    ...
+}
+```
+
+``` java
+public class MessageQueue {
+    ...
+    final void quit() {
+        if (!mQuitAllowed) {
+            throw new RuntimeException("Main thread not allowed to quit.");
+        }
+
+        synchronized (this) {
+            if (mQuiting) {
+                return;
+            }
+            mQuiting = true;
+        }
+        nativeWake(mPtr);
+    }
+    ...
+}
+```
+这一步就是设置mQuiting标志，让Looper退出。
+[See MessageQueue Source](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.2.2_r1/android/os/MessageQueue.java?av=f#213)
+
+#prepareMainLooper()
 这个就是主线程创建Looper时使用的方法。
 ``` java
 public class Looper {
@@ -209,7 +260,9 @@ public final class ActivityThread {
     ...
     public static void main(String[] args) {
         SamplingProfilerIntegration.start();
-        // CloseGuard defaults to true and can be quite spammy.  We disable it here, but selectively enable it later (via StrictMode) on debug builds, but using DropBox, not logs.
+        // CloseGuard defaults to true and can be quite spammy.  We
+        // disable it here, but selectively enable it later (via
+        // StrictMode) on debug builds, but using DropBox, not logs.
         CloseGuard.setEnabled(false);
         Environment.initForCurrentUser();
         // Set the reporter for event logging in libcore
@@ -223,7 +276,8 @@ public final class ActivityThread {
         }
         AsyncTask.init();
         if (false) {
-            Looper.myLooper().setMessageLogging(new LogPrinter(Log.DEBUG, "ActivityThread"));
+            Looper.myLooper().setMessageLogging(new
+                    LogPrinter(Log.DEBUG, "ActivityThread"));
         }
         Looper.loop();
         throw new RuntimeException("Main thread loop unexpectedly exited");
