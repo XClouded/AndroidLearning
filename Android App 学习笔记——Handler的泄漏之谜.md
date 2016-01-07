@@ -29,7 +29,7 @@ To suppress this error, use the issue id "HandlerLeak" as explained in the Suppr
 
 #为什么static以后就不会泄露了呢？
 打个断点看一下，如下图：
-![LeakingProblem](http://img2.tbcdn.cn/L1/461/1/3f79a9d50e409b1cee187fbc46d2d7e82fb7d58f.png)
+![LeakingProblem](https://raw.githubusercontent.com/hycmanson/AndroidFrameworksLearning/master/MarkDownImages/handler1.png)
 
 Handler居然会有Activity的引用，这个也是内部类的特性之一。那如果Activity在message send之前finish那么gc就无法回收finish的Activity因为还在被handler引用着。那这么问题原因找到了，就可以修改它了。
 
@@ -83,7 +83,7 @@ public class UnLeakingActivity extends Activity {
 }
 ```
 我们在debug一下看看，如下图:
-![UnLeaking](http://img3.tbcdn.cn/L1/461/1/bd7f4e34946ef2be67204193e45c3552a551b6e1.png)
+![UnLeaking](https://raw.githubusercontent.com/hycmanson/AndroidFrameworksLearning/master/MarkDownImages/handler2.png)
 
 果然内部引用没有啦。
 
