@@ -92,6 +92,7 @@ public class UnLeakingActivity extends Activity {
 #PS
 如果非static的内部类的生命周期大于Activity，应该避免在Activity内使用。
 这里给一个泄漏的栗子：
+![4Example](https://raw.githubusercontent.com/hycmanson/AndroidFrameworksLearning/master/MarkDownImages/4example.png)
 ``` java
 public class SampleActivity extends Activity {
     private final Handler mLeakyHandler = new Handler() {
