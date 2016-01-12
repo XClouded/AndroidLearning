@@ -1,4 +1,4 @@
-#Android App 学习笔记——Handler的泄漏之谜
+#Handler的泄漏之谜
 #在Activity内的Handler如果是内部类而不带有static属性为什么会造成内存的泄漏
 #背景
 之前在开发的时候遇见了在Android Lint给出了的一个提示HandlerLeak: Handler reference leaks。今天来追究一下其中的原因。

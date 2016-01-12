@@ -1,6 +1,7 @@
-#读读Android源代码 android.os.Looper
+#android.os.Looper
 #Looper不会停止的消息处理机
 [Reference 4 Looper](https://developer.android.com/reference/android/os/Looper.html)
+
 [Source 4 Looper](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.2.2_r1/android/os/Looper.java)
 
 从字面上了解是“循环者”，也就是在不停的循环状态。所谓Looper线程就是循环工作的线程。在程序开发中我们经常会需要一个线程不断循环，一旦有新任务则执行，执行完继续等待下一个任务，这就是Looper。
@@ -47,6 +48,7 @@ public class Looper {
 然而事实并非如此，我们都知道每个线程可以拥有一个Looper而且仅能只有一个Looper。那么在一个应用里面多个线程拥有多个Looper也是很正常的事情。
 
 那么为什么会与我们推理分析的不一样呢？原因就在于ThreadLocal的实现。
+
 [Source 4 ThreadLocal](http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/6-b27/java/lang/ThreadLocal.java)
 ``` java
 public class ThreadLocal<T> {
@@ -163,7 +165,9 @@ public class Looper {
 ```
 注意看一下上面的代码19行，消息循环的逻辑开始。
 第33行通过Message的成员变量target分发Message，也需有些读者已经猜到了，这个target就是一个Handler对象。
+
 [See Message Source](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.2.2_r1/android/os/Message.java/#89)
+
 进入这个loop方法就无限的循环起来了，直到MessageQueue.next()返回的Message为null以后这个循环就结束了。跟踪一下这个方法能让它返回为空就是在以下的代码块。mQuiting的控制请参考下面quit()方法。
 ``` java
 public class MessageQueue {
@@ -177,6 +181,7 @@ public class MessageQueue {
     }
 }
 ```
+
 [See MessageQueue Source](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.2.2_r1/android/os/MessageQueue.java?av=f#127)
 
 #quit()
@@ -215,6 +220,7 @@ public class MessageQueue {
 }
 ```
 这一步就是设置mQuiting标志，让Looper退出。
+
 [See MessageQueue Source](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.2.2_r1/android/os/MessageQueue.java?av=f#213)
 
 #prepareMainLooper()
@@ -254,7 +260,9 @@ public class Looper {
 这里比较特别的一点就是主线程的Looper虽然也是与一般线程一样存储到了sThreadLocal这个对象里，但是Looper.class里面定义了一个static的属性sMainLooper为了守护主线程的Looper对象。
 
 下面就是调用prepareMainLooper()方法的地方，可以看出它在初始化Activity主线程时也初始化的Looper同时，也让Looper loop起来。
+
 [Usages of prepareMainLooper()](http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.2.2_r1/android/app/ActivityThread.java#5025)
+
 ``` java
 public final class ActivityThread {
     ...
