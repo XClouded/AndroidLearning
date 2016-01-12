@@ -87,7 +87,7 @@ public class UnLeakingActivity extends Activity {
 
 果然内部引用没有啦。
 
-源码见附件
+[源码见](https://raw.githubusercontent.com/hycmanson/AndroidFrameworksLearning/master/MarkdownAppSource/HandlerLeakingContext.zip)
 
 #PS
 如果非static的内部类的生命周期大于Activity，应该避免在Activity内使用。
