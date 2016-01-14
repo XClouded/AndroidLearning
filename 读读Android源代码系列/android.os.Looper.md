@@ -1,5 +1,5 @@
 #android.os.Looper
-[TOC]
+
 #Looper不会停止的消息处理机
 [Reference 4 Looper](https://developer.android.com/reference/android/os/Looper.html)
 
