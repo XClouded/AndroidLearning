@@ -77,7 +77,7 @@ public class Handler {
 ###Handler()
 这个方法会自动获取当前线程的Looper，如果没有Looper则会丢出异常。（如果在主线程初始化，主线程在初始化时会创建一个Looper。如果在其他线程就需要先初始化一个Looper再创建Handler对象。）
 
-![4Example](https://raw.githubusercontent.com/hycmanson/AndroidFrameworksLearning/master/MarkDownImages/4example.png)
+![4Example](https://raw.githubusercontent.com/hycmanson/AndroidLearning/master/MarkDownImages/4example.png)
 ``` java
 public class LooperThread extends Thread {
     @Override
