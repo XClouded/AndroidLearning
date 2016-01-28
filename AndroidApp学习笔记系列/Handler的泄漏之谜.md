@@ -5,6 +5,7 @@
 
 #Android Lint给出的提示与解决方案
 通过gradle编译会在app\build\outputs下生成一份Lint的html文档，打开部分内容如下：
+
 ``` java
 HandlerLeak: Handler reference leaks
 ../../src/main/java/com/hyc/handlerleakingcontext/LeakingActivity.java:12: This Handler class should be static or leaks might occur (new android.os.Handler(){})
@@ -25,10 +26,12 @@ More info:
 
 To suppress this error, use the issue id "HandlerLeak" as explained in the Suppressing Warnings and Errors section.
 ```
+
 大致的意思就是如果把Handler定义为内部类，就有可能造成内存泄露。解决它的办法就是把Handler定义为static的类型。
 
 #为什么static以后就不会泄露了呢？
 打个断点看一下，如下图：
+
 ![LeakingProblem](https://raw.githubusercontent.com/hycmanson/AndroidLearning/master/MarkDownImages/handler1.png)
 
 Handler居然会有Activity的引用，这个也是内部类的特性之一。那如果Activity在message send之前finish那么gc就无法回收finish的Activity因为还在被handler引用着。那这么问题原因找到了，就可以修改它了。
@@ -82,7 +85,9 @@ public class UnLeakingActivity extends Activity {
     }
 }
 ```
+
 我们在debug一下看看，如下图:
+
 ![UnLeaking](https://raw.githubusercontent.com/hycmanson/AndroidLearning/master/MarkDownImages/handler2.png)
 
 果然内部引用没有啦。
@@ -92,7 +97,9 @@ public class UnLeakingActivity extends Activity {
 #PS
 如果非static的内部类的生命周期大于Activity，应该避免在Activity内使用。
 这里给一个泄漏的栗子：
+
 ![4Example](https://raw.githubusercontent.com/hycmanson/AndroidLearning/master/MarkDownImages/4example.png)
+
 ``` java
 public class SampleActivity extends Activity {
     private final Handler mLeakyHandler = new Handler() {
