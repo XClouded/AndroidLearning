@@ -69,7 +69,6 @@ TBLocationClient在UI Thread监听手淘的启动，并且进行了耗时的JSON
 CoordTask #1与UI Thread在进行inflate，inflate是有同步锁的，此时可提高MainActivity3 onCreate优先级别来获取更多的资源，提供启动的性能。
 
 通过使用这种自动注入Android Trace代码分析性能方案，有以下效果：
-
 1. 性能开销几乎可以忽略。依赖于Systrace，而Systrace Framework是Atrace，Kernel是Ftrace。Ftrace的性能，在Kernel经过多年的验证，而且完全抛弃了TraceView笨重的实现。
 2. 在Trace APP代码的同时，可充分利用Systrace System功能分析APP的性能。比如多Lock Content、Jank等复杂问题，依旧清晰可见，一目了然。
 
